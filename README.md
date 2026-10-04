@@ -34,3 +34,6 @@ La pagina `#/genealogia-e-sopravvivenza` confronta due grafi della stessa famigl
 Il campione illustrativo è fissato: 8 maschi aploidi, 8 maschi diploidi e 8 future operaie, con regina A/B e padre A. Non rappresenta una distribuzione tipica della colonia. Le eliminazioni riguardano le larve; le immagini adulte identificano i gruppi. Non sono simulate generazioni successive. Regina e padre sono esclusi dal conteggio.
 
 Le illustrazioni naturalistiche di fuco, operaia e regina sono in `public/assets/bees`; il README della cartella documenta i prompt. I due gruppi maschili condividono il disegno: la ploidia è indicata dalle etichette. I test verificano selezioni da zero a otto, identità, parentela e mantenimento degli altri gruppi.
+
+### Discendenza controllata
+La pagina ora mostra sei api selezionabili per gruppo (due maschi aploidi, due diploidi e due operaie: sei in totale) e un grafo collegato alle eliminazioni di D1/D2. Il grafo ha due coppie iniziali, una figlia riproduttrice per coppia e un figlio aploide per figlia. La riproduzione dei diploidi è un controfattuale matematico dichiarato, non un modello genetico realistico. Le partner Q1/Q2 sono esterne alla popolazione iniziale; non si sostituiscono padri assenti. Il grafo ha al massimo otto nodi e tre livelli; i nodi non realizzati rimangono tratteggiati per il confronto.

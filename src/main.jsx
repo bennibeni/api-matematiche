@@ -1,3 +1,6 @@
+import PolyandryPage from './PolyandryPage.jsx';
+import SpiralPage from './SpiralPage.jsx';
+import {GenealogyBee as Bee,beeLabel} from './GenealogyBee.jsx';
 import React,{useEffect,useId,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {buildTree} from './model.js';
@@ -6,11 +9,12 @@ import {Navigation} from './Navigation.jsx';
 import UniparentalPage from './UniparentalPage.jsx';
 import CsdPage from './CsdPage.jsx';
 import SurvivalPage from './SurvivalPage.jsx';
+import AncestralScenarioPage from './AncestralScenarioPage.jsx';
 function RuleInfo({number,title,children}) {
  const dialog=useRef(null), titleId=useId();
  return <><button className="info-button" aria-label={`Informazioni sulla regola ${number}`} aria-haspopup="dialog" onClick={()=>dialog.current.showModal()}><svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.4"/><path d="M10 9v5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><circle cx="10" cy="6" r="1" fill="currentColor"/></svg></button><dialog className="rule-dialog" ref={dialog} aria-labelledby={titleId}><div className="dialog-heading"><p className="eyebrow">LA REGOLA {number} / APPROFONDIMENTO</p><button className="close-info" aria-label="Chiudi approfondimento" onClick={()=>dialog.current.close()}>×</button></div><h2 id={titleId}>{title}</h2><div className="dialog-copy">{children}</div><form method="dialog"><button className="understood">Ho capito</button></form></dialog></>;
 }
-function Bee({type,x=0,y=0}){return <g transform={`translate(${x} ${y})`}><circle r="16" fill={type==='F'?'#f7d888':'#dbe8e2'} stroke={type==='F'?'#bd8b31':'#658779'}/><ellipse cx="-4" cy="-4" rx="4" ry="6" fill="#fffdf6" transform="rotate(-28)"/><ellipse cx="4" cy="-4" rx="4" ry="6" fill="#fffdf6" transform="rotate(28)"/><ellipse cy="3" rx="5" ry="8" fill={type==='F'?'#956a22':'#456e5d'}/><path d="M-4 1H4M-4 5H4" stroke="#fff6d9" strokeWidth="1.5"/></g>}
+
 function App(){const [depth,setDepth]=useState(6);const tree=useMemo(()=>buildTree(depth),[depth]);const count=tree.counts.at(-1);return <main>
 <header><a href="#/" className="brand"><svg viewBox="-20 -20 40 40" width="34" height="34" aria-hidden="true"><Bee type="F"/></svg> API MATEMATICHE</a><Navigation page="fibonacci"/></header>
 <section className="intro"><p className="eyebrow">PICCOLE API / GRANDI NUMERI</p><h1>Fibonacci, di madre<br/>in <em>madre.</em></h1><p>Parti da un fuco e risali il suo albero genealogico.<br className="desktop"/> Ogni generazione rivela il numero successivo della successione.</p></section>
@@ -21,11 +25,11 @@ function App(){const [depth,setDepth]=useState(6);const tree=useMemo(()=>buildTr
 </section>
 <section className="lab"><div className="lab-heading"><div><p className="eyebrow">L’ALBERO DEGLI ANTENATI</p><h2>Una generazione alla volta</h2></div><div className="stepper" aria-label="Profondità del grafo"><button aria-label="Mostra una generazione in meno" disabled={depth===1} onClick={()=>setDepth(d=>d-1)}>−</button><span>Fino a <strong>g{depth}</strong></span><button aria-label="Mostra una generazione in più" disabled={depth===10} onClick={()=>setDepth(d=>d+1)}>+</button></div></div>
 <div className="sequence" aria-label="Numero di individui per generazione">{tree.counts.map((n,g)=><div key={g} className={g===depth?'current':''}><span>g{g}</span><strong>{n}</strong></div>)}</div>
-<div className="graph-meta"><p>Il presente in alto. Il passato verso il basso.</p><div className="legend"><span><i className="dot female"/>Femmina F</span><span><i className="dot male"/>Maschio M</span></div></div>
+<div className="graph-meta"><p>Il presente in alto. Il passato verso il basso.</p><div className="legend"><span><i className="dot female"/>Femmina F</span><span><i className="dot male"/>Maschio M·n</span></div></div>
 <div className="graph-scroll" tabIndex="0" role="region" aria-label="Albero completo, scorribile orizzontalmente"><svg className="tree" width={tree.width} height={tree.height} viewBox={`0 0 ${tree.width} ${tree.height}`} role="img" aria-label={`Albero genealogico del fuco: ${tree.counts.join(', ')} individui nelle generazioni da zero a ${depth}`}>
 {tree.levels.map((level,g)=><g key={g}><line x1="115" x2={tree.width-15} y1={50+g*100} y2={50+g*100} stroke="#eeeade" strokeDasharray="3 6"/><text x="18" y={46+g*100} className="generation">g{g}</text><text x="18" y={65+g*100} className="row-count">{level.length} {level.length===1?'individuo':'individui'}</text></g>)}
 {tree.nodes.flatMap(n=>n.parents.map(id=>{const p=tree.nodes[id];const y=50+n.generation*100;return <path key={`${n.id}-${id}`} d={`M${n.x} ${y+16} C${n.x} ${y+52},${p.x} ${y+48},${p.x} ${y+84}`} fill="none" stroke="#c6cdbd" strokeWidth="1.5"/>;}))}
-{tree.nodes.map(n=><g key={n.id} className="bee-node"><title>{n.type==='M'?'Maschio':'Femmina'} · g{n.generation} · individuo {n.id+1}{n.generation===depth?' · limite della vista':''}</title><Bee type={n.type} x={n.x} y={50+n.generation*100}/><text x={n.x} y={79+n.generation*100} textAnchor="middle" className="node-label">{n.type}</text></g>)}
+{tree.nodes.map(n=><g key={n.id} className="bee-node"><title>{n.type==='M'?'Maschio':'Femmina'} · g{n.generation} · individuo {n.id+1}{n.generation===depth?' · limite della vista':''}</title><Bee type={n.type} x={n.x} y={50+n.generation*100}/><text x={n.x} y={79+n.generation*100} textAnchor="middle" className="node-label">{beeLabel(n.type)}</text></g>)}
 </svg></div><div className="graph-footer"><span>Tutte le api sono mostrate. Scorri lateralmente se l’albero supera lo schermo.</span><span>g0 è il fuco iniziale.</span></div></section>
 <section className="explanation"><div><p className="eyebrow">NON È UNA COINCIDENZA</p><h2>Il numero nasce<br/>dalla regola.</h2><p>Ogni ape aggiunge una madre alla generazione precedente. Solo le femmine aggiungono anche un padre. Per questo, dopo i primi due livelli, ogni totale è la somma dei due precedenti.</p><p className="boundary">L’ultima riga è soltanto il limite della vista: anche quelle api hanno antenati.</p></div><div className="equation"><p>ALLA GENERAZIONE g{depth}</p>{depth>=2?<><div><span>{tree.counts[depth-2]}</span><i>+</i><span>{tree.counts[depth-1]}</span><i>=</i><strong>{count}</strong></div><small>g{depth-2} <span>+</span> g{depth-1} <span>→</span> g{depth}</small></>:<><div><strong>1</strong><i>→</i><strong>1</strong></div><small>Un fuco, una madre: i due valori iniziali.</small></>}<p className="formula">N(g) = N(g − 1) + N(g − 2), per g ≥ 2</p></div></section>
 <footer><span>API MATEMATICHE</span><p>Un modello matematico ispirato alle api. Antenati sempre distinti, regole fisse, nessuna casualità.</p></footer></main>}
@@ -35,7 +39,11 @@ function Pages(){
  const uniparental=hash==='#/una-femmina-senza-padre';
  const csd=hash==='#/alleli-e-sesso';
  const survival=hash==='#/genealogia-e-sopravvivenza';
- useEffect(()=>{document.title=survival?'Eliminazione larvale · Api matematiche':csd?'Alleli e sesso · Api matematiche':uniparental?'Una femmina senza padre · Api matematiche':'Api matematiche';},[uniparental,csd,survival]);
- return survival?<SurvivalPage/>:csd?<CsdPage/>:uniparental?<UniparentalPage/>:<App/>;
+ const scenarios=hash==='#/scenari-genealogici';
+ const polyandry=hash==='#/poliandria';
+ const spiral=hash==='#/spirale-aurea';
+ useEffect(()=>{document.title=polyandry?'Poliandria · Api matematiche':spiral?'Fibonacci e spirale · Api matematiche':scenarios?'Fibonacci e diploidia · Api matematiche':survival?'Eliminazione larvale · Api matematiche':csd?'Alleli e sesso · Api matematiche':uniparental?'Una femmina senza padre · Api matematiche':'Api matematiche';},[uniparental,csd,survival,scenarios,spiral,polyandry]);
+ return polyandry?<PolyandryPage/>:spiral?<SpiralPage/>:scenarios?<AncestralScenarioPage/>:survival?<SurvivalPage/>:csd?<CsdPage/>:uniparental?<UniparentalPage/>:<App/>;
 }
 createRoot(document.getElementById('root')).render(<Pages/>);
+
