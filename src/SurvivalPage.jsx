@@ -1,31 +1,35 @@
 import React,{useState} from 'react';
 import {Navigation} from './Navigation.jsx';
-
 import {beeGroups} from './BeeIllustration.jsx';
-import {ColonyGraph,beeAssets} from './ColonyGraph.jsx';
-import {selectedBrood} from './survival.js';
-
-
-
+import {beeAssets} from './ColonyGraph.jsx';
+import {resourceExperiment,resourceScenarios} from './resourceExperiment.js';
 export default function SurvivalPage(){
- const [eliminated,setEliminated]=useState([]);
- const current=selectedBrood(eliminated,2);
- const toggle=id=>setEliminated(ids=>ids.includes(id)?ids.filter(x=>x!==id):[...ids,id]);
+ const [scenario,setScenario]=useState('all');
+ const model=resourceExperiment(scenario);
+ const bee=(x,y,group,label,sub)=><g><rect x={x-47} y={y-38} width="94" height="100" rx="12" fill="#fffdf6" stroke="#d6d8c5"/><image href={beeAssets[group]} x={x-30} y={y-34} width="60" height="60"/><text x={x} y={y+40} textAnchor="middle">{label}</text><text x={x} y={y+54} textAnchor="middle" className="family-small">{sub}</text></g>;
  return <main className="survival-page colony-page"><header><a href="#/" className="brand">✳ API MATEMATICHE</a><Navigation page="survival"/></header>
- <section className="colony-intro"><div><p className="eyebrow">ESPERIMENTO 04 / LA COLONIA</p><h1>La popolazione della <em>colonia.</em></h1><p>Le immagini rappresentano api adulte. Seleziona quali maschi diploidi non raggiungono questo stadio.</p></div></section>
+ <section className="colony-intro"><p className="eyebrow">ESPERIMENTO 04 / LA COLONIA</p><h1>La popolazione della <em>colonia.</em></h1><p>Con risorse limitate, come cambia il contributo riproduttivo quando eliminiamo alcuni individui?</p></section>
  <section className="species-strip" aria-label="Quattro gruppi di api">{Object.entries(beeGroups).map(([group,info])=><article key={group} data-bee={group}><img src={beeAssets[group]} alt={info.label} width="112" height="112"/><div><span className="species-code" style={{color:info.color}}>{info.short}</span><h2>{info.label}</h2></div></article>)}</section>
- <div className="population-workspace"><section className="colony-lab colony-single" aria-labelledby="comparison-heading"><div className="colony-toolbar"><div><h2 id="comparison-heading">Seleziona i maschi diploidi da eliminare</h2><p>Clicca un’ape diploide per sostituirla con una croce; clicca di nuovo per ripristinarla.</p></div></div>
- <article className="lab colony-edited"><div className="colony-panel-heading"><h3>Popolazione presente</h3><span><strong>{current.alive}</strong> discendenti</span></div><ColonyGraph brood={current} interactive onToggle={toggle}/></article> <div className="colony-summary" role="status"><span><strong>{current.removed}</strong> {current.removed===1?'eliminato':'eliminati'}</span><span><strong>2</strong> maschi aploidi</span><span><strong>{2-current.removed}</strong> {2-current.removed===1?'maschio diploide':'maschi diploidi'}</span><span><strong>2</strong> operaie</span></div>
- <p className="colony-caption">Nel maschio aploide, la piccola sezione mostra i testicoli interni con proporzioni indicative. Sono raffigurati adulti, non larve. La croce indica un individuo eliminato prima di diventare adulto. Le sagome tratteggiate permettono di ripristinare gli individui esclusi dalla popolazione presente.</p></section>
- </div><details className="colony-assumptions"><summary>Composizione e regole del modello</summary><p>Regina A/B e padre aploide A. Mostriamo 6 discendenti: 2 maschi aploidi da uova non fecondate, 2 maschi diploidi A/A e 2 operaie A/B da uova fecondate. Le proporzioni sono fissate per questo esperimento, non descrivono una colonia tipica. Regina e padre non rientrano nel conteggio dei discendenti; il padre è rappresentato come partner riproduttivo, non come membro residente.</p><p>Le linee collegano i genitori ai figli: i maschi aploidi hanno solo la madre; gli altri individui hanno entrambi i genitori. Operaia e regina sono caste femminili, normalmente diploidi. Le femmine rappresentate in questa popolazione sono operaie.</p><p>La sezione anatomica è mostrata solo nel maschio aploide per scelta illustrativa: la sua assenza nel disegno del maschio diploide non indica assenza di testicoli. Le eliminazioni non modificano le parentele della popolazione iniziale.</p><p className="source-note">Fonti: <a href="https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1000222" target="_blank" rel="noreferrer">determinazione del sesso</a>; <a href="https://canr.udel.edu/maarec/honey-bee-biology/the-colony-and-its-organization/" target="_blank" rel="noreferrer">caste e organizzazione della colonia</a>.</p></details>
- <footer><a href="#/alleli-e-sesso">← Alleli e sesso</a><p>Una popolazione ridotta · sei individui iniziali.</p></footer></main>;
+ <section className="family-rules"><p className="eyebrow">PARAMETRI FISSI / ESPERIMENTO MATEMATICO</p><ol><li>Disponiamo di <strong>40 unità di cibo</strong> per completare l’allevamento dei maschi. Ogni maschio allevato ne richiede <strong>10</strong>, aploide o diploide.</li><li>Il contributo riproduttivo atteso è di <strong>4 discendenti per aploide</strong> e <strong>1 per diploide</strong>.</li><li>Eliminare precocemente i due diploidi evita <strong>20 unità di spesa futura</strong>. Il cibo già consumato è escluso dal bilancio e non viene recuperato.</li><li>Per riutilizzare il risparmio sono disponibili <strong>due ulteriori larve aploidi, M3 e M4</strong>, e il tempo necessario per allevarle. Senza risorse assegnate, non entrano nel gruppo di adulti rappresentato.</li></ol><p>Numeri illustrativi, non misure biologiche. Il bilancio riguarda soltanto questa coorte di maschi: regine, operaie e allevamento dei futuri discendenti sono esclusi. La riproduzione dei diploidi resta una semplificazione; non modelliamo sesso, ploidia o eredità dei discendenti.</p></section>
+ <section className="lab"><div className="lab-heading"><div><p className="eyebrow">RISORSE LIMITATE / TRE SCENARI</p><h2>Quanto contribuisce ogni individuo?</h2></div></div>
+ <fieldset className="resource-choices"><legend>Scegli come impiegare le stesse 40 unità di cibo</legend>{resourceScenarios.map(s=><label key={s.id}><input type="radio" name="resource-scenario" value={s.id} checked={scenario===s.id} onChange={()=>setScenario(s.id)}/><span><strong>{s.label}</strong><small>{s.description}</small></span></label>)}</fieldset>
+ <div className="family-scroll" tabIndex="0" role="region" aria-label="Grafo del contributo riproduttivo, scorribile orizzontalmente"><svg className="family-svg" viewBox="0 0 1000 660" role="group" aria-label={`${model.adults} maschi allevati, ${model.output} discendenti attesi`}>
+ <text x="20" y="24" className="family-level">GENITORI DELLA COORTE</text>
+ <path d="M430 137 V234 M190 242 V234 H962 V242" fill="none" stroke="#b28b40" strokeWidth="2.5"/>
+ {[510,645].map(x=><path key={x} d={`M610 137 C610 180 ${x} 185 ${x} 250`} stroke="#70958b" strokeWidth="2" fill="none"/>)}
+ {bee(430,75,'queen','Regina','madre dei maschi')}{bee(610,75,'haploid','Fuco','padre di D1 e D2')}
+ <text x="190" y="210" className="family-level">MASCHI DA ALLEVARE · M3 E M4 SONO AGGIUNTIVI</text>
+ {bee(70,288,'queen','Regina esterna','partner condivisa')}
+ <path d="M70 350 V525 H962 M70 525 H190" fill="none" stroke="#b28b40" strokeWidth="2.5"/>
+ {model.males.map(n=><g key={n.id}>{n.state==='reared'?bee(n.x,288,n.group,n.id,`${n.capacity} ${n.capacity===1?'discendente atteso':'discendenti attesi'}`):<g><rect x={n.x-47} y="250" width="94" height="100" rx="12" fill="#f5f1e9" stroke="#c5b6a7" strokeDasharray="5 5"/>{n.state==='removed'&&<text x={n.x} y="287" textAnchor="middle" style={{fontSize:32}}>×</text>}<text x={n.x} y="312" textAnchor="middle">{n.id}</text><text x={n.x} y="332" textAnchor="middle" className="family-small">{n.state==='removed'?'eliminato':'non allevato'}</text></g>}
+ {n.state==='reared'&&<><path d={`M${n.x} 350 V550`} fill="none" stroke="#628e85" strokeWidth="2.5"/><rect x={n.x-47} y="550" width="94" height="70" rx="10" fill="#eef0df" stroke="#cbd2b8"/>{Array.from({length:n.capacity},(_,i)=><circle key={i} cx={n.x+(i-(n.capacity-1)/2)*18} cy="573" r="6" fill="#6d8a65"/>)}<text x={n.x} y="604" textAnchor="middle">{n.capacity} attes{n.capacity===1?'o':'i'}</text></>}
+ </g>)}
+ <text x="190" y="491" className="family-level">CONTRIBUTO ATTESO · UN PUNTO = UN DISCENDENTE ATTESO</text>
+ </svg></div>
+ <p className="poly-instruction">I disegni mostrano gli adulti ottenuti; le larve non sono disegnate. Un ramo dorato comune riassume i legami materni. Le linee verdi indicano il contributo paterno. I punti sono una previsione numerica, non nascite osservate né api di sesso o ploidia assegnati.</p>
+ <div className="resource-results" role="status"><div><strong>{model.adults}</strong><span>maschi allevati</span></div><div><strong>{model.spent} / 40</strong><span>cibo impiegato</span></div><div><strong>{model.remaining}</strong><span>cibo rimasto</span></div><div><strong>{model.output}</strong><span>discendenti attesi</span></div><div><strong>{(model.efficiency*10).toLocaleString('it-IT')}</strong><span>attesi ogni 10 unità di cibo</span></div><p>{scenario==='all'?'Riferimento: 2 × 4 + 2 × 1 = 10 discendenti attesi. Tutte le 40 unità vengono impiegate.':scenario==='save'?'Il contributo totale scende da 10 a 8, mentre il cibo impiegato scende da 40 a 20. Aumenta l’efficienza, non il numero atteso di discendenti.':'Le 20 unità risparmiate finanziano M3 e M4: quattro aploidi producono un contributo atteso di 16. Il beneficio dipende dalla disponibilità di nuove larve, cibo riallocabile e tempo.'}</p></div>
+ </section>
+ <section className="scenario-explanation"><div><h2>Quanto dipende dagli individui eliminati?</h2><p>In questo modello, rinunciare ai due diploidi toglie due discendenti attesi. Se il cibo viene riallocato ai due aploidi aggiuntivi, ne aggiunge otto: il saldo rispetto allo scenario iniziale è +6.</p><p>La cancellazione da sola non crea questo vantaggio. È il diverso impiego delle risorse a cambiare il risultato.</p></div><div><h2>Che cosa significa un beneficio?</h2><p>Misuriamo un contributo riproduttivo atteso e il suo costo. Non misuriamo la sopravvivenza della colonia, né la sua popolazione futura: la regina partner è esterna e i discendenti non diventano automaticamente membri della colonia originaria.</p><p>La disponibilità di cibo può influenzare anche la qualità riproduttiva dei fuchi. Qui teniamo costanti le capacità per isolare il confronto fra allevamento, risparmio e riallocazione.</p><p><a href="https://link.springer.com/article/10.1007/s13592-014-0296-z" target="_blank" rel="noreferrer">Studio su alimentazione e qualità dei fuchi</a></p></div></section>
+ <details className="colony-assumptions"><summary>Collegamento con gli alleli e il sesso</summary><p>Eliminare i maschi diploidi presenti non elimina la possibilità che ne nascano altri. Le condizioni genetiche sono trattate nella pagina «Alleli e sesso»; i punti di questo esperimento non assegnano un corredo genetico ai discendenti.</p></details>
+ <footer><a href="#/alleli-e-sesso">← Alleli e sesso</a><p>Un bilancio di risorse · un contributo riproduttivo atteso.</p></footer></main>;
 }
-
-
-
-
-
-
-
-
-
