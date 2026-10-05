@@ -1,35 +1,371 @@
-import React,{useState} from 'react';
-import {Navigation,PageJourney,PageHeadingLabel} from './Navigation.jsx';
-import {beeGroups,beeAssets} from './beeAssets.js';
-import {resourceExperiment,resourceScenarios} from './resourceExperiment.js';
-export default function SurvivalPage(){
- const [scenario,setScenario]=useState('all');
- const model=resourceExperiment(scenario);
- const bee=(x,y,group,label,sub)=><g><rect x={x-47} y={y-38} width="94" height="100" rx="12" fill="#fffdf6" stroke="#d6d8c5"/><image href={beeAssets[group]} x={x-30} y={y-34} width="60" height="60"/><text x={x} y={y+40} textAnchor="middle">{label}</text><text x={x} y={y+54} textAnchor="middle" className="family-small">{sub}</text></g>;
- return <main className="survival-page colony-page"><header><Navigation page="survival"/></header>
- <section className="colony-intro"><PageHeadingLabel page="survival"/><h1>Eliminare i maschi diploidi.<br/><em>Che cosa cambia?</em></h1><p>Le operaie eliminano normalmente i maschi diploidi nelle prime fasi larvali. Confrontiamo il costo di allevarli con il risparmio ottenuto dalla loro eliminazione.</p></section>
- <aside className="reading-note" aria-label="Da tenere a mente"><strong>Da tenere a mente</strong><p>Qui confrontiamo tre modi di usare lo stesso cibo per allevare un piccolo gruppo di maschi. I numeri sono scelti per l’esperimento: non sono misure di una colonia reale. Il risparmio dà più discendenti attesi soltanto se possiamo usarlo per allevare altri maschi.</p></aside>
- <section className="species-strip" aria-label="Quattro gruppi di api">{Object.entries(beeGroups).map(([group,info])=><article key={group} data-bee={group}><img src={beeAssets[group]} alt={info.label} width="112" height="112"/><div><span className="species-code" style={{color:info.color}}>{info.short}</span><h2>{info.label}</h2></div></article>)}</section>
- <section className="family-rules"><p className="eyebrow">PARAMETRI FISSI / ESPERIMENTO MATEMATICO</p><ol><li>Disponiamo di <strong>40 unità di cibo</strong> per completare l’allevamento dei maschi. Ogni maschio allevato ne richiede <strong>10</strong>, aploide o diploide.</li><li>Nello stesso periodo riproduttivo convenzionale, ogni maschio aploide contribuisce in media con <strong>4 figli</strong> e ogni maschio diploide con <strong>1 figlio</strong>. Contiamo soltanto i figli diretti e sommiamo i contributi: assumiamo che gli accoppiamenti e le uova disponibili non li limitino.</li><li>Eliminare precocemente i due diploidi evita <strong>20 unità di spesa futura</strong>. Il cibo già consumato è escluso dal bilancio e non viene recuperato.</li><li>Dopo il gruppo iniziale, consideriamo una <strong>seconda opportunità di allevamento: due larve aploidi</strong>, indicate nel grafo come M3 e M4. Assumiamo che ci sia tempo per portarle allo stadio adulto e consentire anche a loro un periodo riproduttivo della stessa durata. Nel terzo scenario destiniamo loro il cibo risparmiato; negli altri scenari non avviamo questo ulteriore allevamento. </li></ol><p>Numeri illustrativi, non misure biologiche. Il bilancio riguarda soltanto questo gruppo di maschi: regine, operaie e allevamento dei futuri discendenti sono esclusi. La riproduzione dei diploidi resta una semplificazione; non modelliamo sesso, ploidia o eredità dei discendenti.</p></section>
- <section className="lab"><div className="lab-heading"><div><p className="eyebrow">RISORSE LIMITATE / TRE SCENARI</p><h2>Quanto contribuisce ogni individuo?</h2></div></div>
- <fieldset className="resource-choices"><legend>Scegli come impiegare le stesse 40 unità di cibo</legend>{resourceScenarios.map(s=><label key={s.id}><input type="radio" name="resource-scenario" value={s.id} checked={scenario===s.id} onChange={()=>setScenario(s.id)}/><span><strong>{s.label}</strong><small>{s.description}</small></span></label>)}</fieldset>
- <p className="poly-instruction">Verso i discendenti ↓</p><div className="family-scroll" tabIndex="0" role="region" aria-label="Grafo del contributo riproduttivo, scorribile orizzontalmente"><svg className="family-svg" viewBox="0 0 1000 660" role="group" aria-label={`${model.adults} maschi allevati, ${model.output} discendenti attesi`}>
- <text x="20" y="24" className="family-level">GENITORI DEL GRUPPO</text>
- <path d="M430 137 V234 M190 242 V234 H962 V242" fill="none" stroke="#b28b40" strokeWidth="2.5"/>
- {[510,645].map(x=><path key={x} d={`M610 137 C610 180 ${x} 185 ${x} 250`} stroke="#70958b" strokeWidth="2" fill="none"/>)}
- {bee(430,75,'queen','Regina','madre dei maschi')}{bee(610,75,'haploid','Fuco','padre di D1 e D2')}
- <text x="190" y="210" className="family-level">GRUPPO INIZIALE · A DESTRA, DUE APLOIDI ALLEVABILI IN SEGUITO</text>
- {bee(70,288,'queen','Regina esterna','partner condivisa')}
- <path d="M70 350 V525 H962 M70 525 H190" fill="none" stroke="#b28b40" strokeWidth="2.5"/>
- {model.males.map(n=><g key={n.id}>{n.state==='reared'?bee(n.x,288,n.group,n.id,n.group==='haploid'?'Maschio aploide':'Maschio diploide'):<g><rect x={n.x-47} y="250" width="94" height="100" rx="12" fill="#f5f1e9" stroke="#c5b6a7" strokeDasharray="5 5"/>{n.state==='removed'&&<text x={n.x} y="287" textAnchor="middle" style={{fontSize:32}}>×</text>}<text x={n.x} y="312" textAnchor="middle">{n.id}</text><text x={n.x} y="332" textAnchor="middle" className="family-small">{n.state==='removed'?'eliminato':'non avviato'}</text></g>}
- {n.state==='reared'&&<><path d={`M${n.x} 350 V550`} fill="none" stroke="#628e85" strokeWidth="2.5"/><rect x={n.x-47} y="550" width="94" height="70" rx="10" fill="#eef0df" stroke="#cbd2b8"/>{Array.from({length:n.capacity},(_,i)=><circle key={i} cx={n.x+(i-(n.capacity-1)/2)*18} cy="573" r="6" fill="#6d8a65"/>)}<text x={n.x} y="604" textAnchor="middle">{n.capacity} attes{n.capacity===1?'o':'i'}</text></>}
- </g>)}
- <text x="190" y="491" className="family-level">CONTRIBUTO ATTESO · UN PUNTO = UN DISCENDENTE ATTESO</text>
- </svg></div>
- <p className="poly-instruction">I disegni mostrano gli adulti ottenuti; le larve non sono disegnate. Un ramo dorato comune riassume i legami materni. Le linee verdi indicano il contributo paterno. I punti sono una previsione numerica, non nascite osservate né api di sesso o ploidia assegnati.</p>
- <div className="resource-results" role="status"><div><strong>{model.adults}</strong><span>maschi allevati</span></div><div><strong>{model.spent} / 40</strong><span>cibo impiegato</span></div><div><strong>{model.remaining}</strong><span>cibo rimasto</span></div><div><strong>{model.output}</strong><span>discendenti attesi</span></div><div><strong>{(model.efficiency*10).toLocaleString('it-IT')}</strong><span>attesi ogni 10 unità di cibo</span></div><p>{scenario==='all'?'Riferimento: 2 × 4 + 2 × 1 = 10 discendenti attesi. Tutte le 40 unità vengono impiegate.':scenario==='save'?'Il contributo totale scende da 10 a 8, mentre il cibo impiegato scende da 40 a 20. Aumenta l’efficienza, non il numero atteso di discendenti.':'Le 20 unità risparmiate finanziano i due maschi aploidi aggiuntivi: quattro aploidi producono un contributo atteso di 16. Il beneficio dipende dalla disponibilità di nuove larve, cibo riutilizzabile e tempo.'}</p></div>
- </section>
- <section className="scenario-explanation"><div><h2>Quanto dipende dagli individui eliminati?</h2><p>In questo modello, rinunciare ai due diploidi toglie due discendenti attesi. Se il cibo viene destinato ai due aploidi aggiuntivi, ne aggiunge otto: il saldo rispetto allo scenario iniziale è +6.</p><p>Senza riutilizzare il cibo, i discendenti attesi scendono da 10 a 8; riutilizzandolo salgono a 16. Il risultato dipende quindi sia dagli individui eliminati sia da come impieghiamo il risparmio.</p></div><div><h2>Che cosa significa un beneficio?</h2><p>Più discendenti attesi e meno cibo consumato sono due risultati diversi. Nel secondo scenario risparmiamo cibo, ma il contributo totale diminuisce; nel terzo aumenta, a parità di spesa iniziale. Questo non misura direttamente la sopravvivenza della colonia, né la sua popolazione futura: la regina partner è esterna e i discendenti non diventano automaticamente membri della colonia originaria.</p><p>La disponibilità di cibo può influenzare anche la qualità riproduttiva dei fuchi. Qui teniamo costanti le capacità per isolare il confronto fra allevamento, risparmio e riutilizzo.</p><p><a href="https://link.springer.com/article/10.1007/s13592-014-0296-z" target="_blank" rel="noreferrer">Studio su alimentazione e qualità dei fuchi</a></p></div></section>
- <aside className="beekeeper-note"><img src="/assets/allevatore.png" alt="Illustrazione di un apicoltore circondato da api" width="110" height="106"/><div><h2>Di chi sono le risorse risparmiate?</h2><p>L’eliminazione delle larve diploidi è compiuta dalle operaie: riguarda prima di tutto le risorse della colonia, non una scelta dell’apicoltore. Può evitare di proseguire l’allevamento di individui con ridotta capacità riproduttiva. Nella simulazione scegliamo noi lo scenario per osservarne le conseguenze; il vantaggio per la colonia dipende da come vengono usate le risorse disponibili.</p></div></aside>
- <PageJourney page="survival"/></main>;
+import React, { useState } from 'react'
+import { Navigation, PageJourney, PageHeadingLabel } from './Navigation.jsx'
+import { beeGroups, beeAssets } from './beeAssets.js'
+import { resourceExperiment, resourceScenarios } from './resourceExperiment.js'
+export default function SurvivalPage() {
+  const [scenario, setScenario] = useState('all')
+  const model = resourceExperiment(scenario)
+  const bee = (x, y, group, label, sub) => (
+    <g>
+      <rect
+        x={x - 47}
+        y={y - 38}
+        width="94"
+        height="100"
+        rx="12"
+        fill="#fffdf6"
+        stroke="#d6d8c5"
+      />
+      <image
+        href={beeAssets[group]}
+        x={x - 30}
+        y={y - 34}
+        width="60"
+        height="60"
+      />
+      <text x={x} y={y + 40} textAnchor="middle">
+        {label}
+      </text>
+      <text x={x} y={y + 54} textAnchor="middle" className="family-small">
+        {sub}
+      </text>
+    </g>
+  )
+  return (
+    <main className="survival-page colony-page">
+      <header>
+        <Navigation page="survival" />
+      </header>
+      <section className="colony-intro">
+        <PageHeadingLabel page="survival" />
+        <h1>
+          Eliminare i maschi diploidi.
+          <br />
+          <em>Che cosa cambia?</em>
+        </h1>
+        <p>
+          Le operaie eliminano normalmente i maschi diploidi nelle prime fasi
+          larvali. Confrontiamo il costo di allevarli con il risparmio ottenuto
+          dalla loro eliminazione.
+        </p>
+      </section>
+      <aside className="reading-note" aria-label="Da tenere a mente">
+        <strong>Da tenere a mente</strong>
+        <p>
+          Qui confrontiamo tre modi di usare lo stesso cibo per allevare un
+          piccolo gruppo di maschi. I numeri sono scelti per l’esperimento: non
+          sono misure di una colonia reale. Il risparmio dà più discendenti
+          attesi soltanto se possiamo usarlo per allevare altri maschi.
+        </p>
+      </aside>
+      <section className="species-strip" aria-label="Quattro gruppi di api">
+        {Object.entries(beeGroups).map(([group, info]) => (
+          <article key={group} data-bee={group}>
+            <img
+              src={beeAssets[group]}
+              alt={info.label}
+              width="112"
+              height="112"
+            />
+            <div>
+              <span className="species-code" style={{ color: info.color }}>
+                {info.short}
+              </span>
+              <h2>{info.label}</h2>
+            </div>
+          </article>
+        ))}
+      </section>
+      <section className="family-rules">
+        <p className="eyebrow">PARAMETRI FISSI / ESPERIMENTO MATEMATICO</p>
+        <ol>
+          <li>
+            Disponiamo di <strong>40 unità di cibo</strong> per completare
+            l’allevamento dei maschi. Ogni maschio allevato ne richiede{' '}
+            <strong>10</strong>, aploide o diploide.
+          </li>
+          <li>
+            Nello stesso periodo riproduttivo convenzionale, ogni maschio
+            aploide contribuisce in media con <strong>4 figli</strong> e ogni
+            maschio diploide con <strong>1 figlio</strong>. Contiamo soltanto i
+            figli diretti e sommiamo i contributi: assumiamo che gli
+            accoppiamenti e le uova disponibili non li limitino.
+          </li>
+          <li>
+            Eliminare precocemente i due diploidi evita{' '}
+            <strong>20 unità di spesa futura</strong>. Il cibo già consumato è
+            escluso dal bilancio e non viene recuperato.
+          </li>
+          <li>
+            Dopo il gruppo iniziale, consideriamo una{' '}
+            <strong>
+              seconda opportunità di allevamento: due larve aploidi
+            </strong>
+            , indicate nel grafo come M3 e M4. Assumiamo che ci sia tempo per
+            portarle allo stadio adulto e consentire anche a loro un periodo
+            riproduttivo della stessa durata. Nel terzo scenario destiniamo loro
+            il cibo risparmiato; negli altri scenari non avviamo questo
+            ulteriore allevamento.{' '}
+          </li>
+        </ol>
+        <p>
+          Numeri illustrativi, non misure biologiche. Il bilancio riguarda
+          soltanto questo gruppo di maschi: regine, operaie e allevamento dei
+          futuri discendenti sono esclusi. La riproduzione dei diploidi resta
+          una semplificazione; non modelliamo sesso, ploidia o eredità dei
+          discendenti.
+        </p>
+      </section>
+      <section className="lab">
+        <div className="lab-heading">
+          <div>
+            <p className="eyebrow">RISORSE LIMITATE / TRE SCENARI</p>
+            <h2>Quanto contribuisce ogni individuo?</h2>
+          </div>
+        </div>
+        <fieldset className="resource-choices">
+          <legend>Scegli come impiegare le stesse 40 unità di cibo</legend>
+          {resourceScenarios.map((s) => (
+            <label key={s.id}>
+              <input
+                type="radio"
+                name="resource-scenario"
+                value={s.id}
+                checked={scenario === s.id}
+                onChange={() => setScenario(s.id)}
+              />
+              <span>
+                <strong>{s.label}</strong>
+                <small>{s.description}</small>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        <p className="poly-instruction">Verso i discendenti ↓</p>
+        <div
+          className="family-scroll"
+          tabIndex="0"
+          role="region"
+          aria-label="Grafo del contributo riproduttivo, scorribile orizzontalmente"
+        >
+          <svg
+            className="family-svg"
+            viewBox="0 0 1000 660"
+            role="group"
+            aria-label={`${model.adults} maschi allevati, ${model.output} discendenti attesi`}
+          >
+            <text x="20" y="24" className="family-level">
+              GENITORI DEL GRUPPO
+            </text>
+            <path
+              d="M430 137 V234 M190 242 V234 H962 V242"
+              fill="none"
+              stroke="#b28b40"
+              strokeWidth="2.5"
+            />
+            {[510, 645].map((x) => (
+              <path
+                key={x}
+                d={`M610 137 C610 180 ${x} 185 ${x} 250`}
+                stroke="#70958b"
+                strokeWidth="2"
+                fill="none"
+              />
+            ))}
+            {bee(430, 75, 'queen', 'Regina', 'madre dei maschi')}
+            {bee(610, 75, 'haploid', 'Fuco', 'padre di D1 e D2')}
+            <text x="190" y="210" className="family-level">
+              GRUPPO INIZIALE · A DESTRA, DUE APLOIDI ALLEVABILI IN SEGUITO
+            </text>
+            {bee(70, 288, 'queen', 'Regina esterna', 'partner condivisa')}
+            <path
+              d="M70 350 V525 H962 M70 525 H190"
+              fill="none"
+              stroke="#b28b40"
+              strokeWidth="2.5"
+            />
+            {model.males.map((n) => (
+              <g key={n.id}>
+                {n.state === 'reared' ? (
+                  bee(
+                    n.x,
+                    288,
+                    n.group,
+                    n.id,
+                    n.group === 'haploid'
+                      ? 'Maschio aploide'
+                      : 'Maschio diploide',
+                  )
+                ) : (
+                  <g>
+                    <rect
+                      x={n.x - 47}
+                      y="250"
+                      width="94"
+                      height="100"
+                      rx="12"
+                      fill="#f5f1e9"
+                      stroke="#c5b6a7"
+                      strokeDasharray="5 5"
+                    />
+                    {n.state === 'removed' && (
+                      <text
+                        x={n.x}
+                        y="287"
+                        textAnchor="middle"
+                        style={{ fontSize: 32 }}
+                      >
+                        ×
+                      </text>
+                    )}
+                    <text x={n.x} y="312" textAnchor="middle">
+                      {n.id}
+                    </text>
+                    <text
+                      x={n.x}
+                      y="332"
+                      textAnchor="middle"
+                      className="family-small"
+                    >
+                      {n.state === 'removed' ? 'eliminato' : 'non avviato'}
+                    </text>
+                  </g>
+                )}
+                {n.state === 'reared' && (
+                  <>
+                    <path
+                      d={`M${n.x} 350 V550`}
+                      fill="none"
+                      stroke="#628e85"
+                      strokeWidth="2.5"
+                    />
+                    <rect
+                      x={n.x - 47}
+                      y="550"
+                      width="94"
+                      height="70"
+                      rx="10"
+                      fill="#eef0df"
+                      stroke="#cbd2b8"
+                    />
+                    {Array.from({ length: n.capacity }, (_, i) => (
+                      <circle
+                        key={i}
+                        cx={n.x + (i - (n.capacity - 1) / 2) * 18}
+                        cy="573"
+                        r="6"
+                        fill="#6d8a65"
+                      />
+                    ))}
+                    <text x={n.x} y="604" textAnchor="middle">
+                      {n.capacity} attes{n.capacity === 1 ? 'o' : 'i'}
+                    </text>
+                  </>
+                )}
+              </g>
+            ))}
+            <text x="190" y="491" className="family-level">
+              CONTRIBUTO ATTESO · UN PUNTO = UN DISCENDENTE ATTESO
+            </text>
+          </svg>
+        </div>
+        <p className="poly-instruction">
+          I disegni mostrano gli adulti ottenuti; le larve non sono disegnate.
+          Un ramo dorato comune riassume i legami materni. Le linee verdi
+          indicano il contributo paterno. I punti sono una previsione numerica,
+          non nascite osservate né api di sesso o ploidia assegnati.
+        </p>
+        <div className="resource-results" role="status">
+          <div>
+            <strong>{model.adults}</strong>
+            <span>maschi allevati</span>
+          </div>
+          <div>
+            <strong>{model.spent} / 40</strong>
+            <span>cibo impiegato</span>
+          </div>
+          <div>
+            <strong>{model.remaining}</strong>
+            <span>cibo rimasto</span>
+          </div>
+          <div>
+            <strong>{model.output}</strong>
+            <span>discendenti attesi</span>
+          </div>
+          <div>
+            <strong>{(model.efficiency * 10).toLocaleString('it-IT')}</strong>
+            <span>attesi ogni 10 unità di cibo</span>
+          </div>
+          <p>
+            {scenario === 'all'
+              ? 'Riferimento: 2 × 4 + 2 × 1 = 10 discendenti attesi. Tutte le 40 unità vengono impiegate.'
+              : scenario === 'save'
+                ? 'Il contributo totale scende da 10 a 8, mentre il cibo impiegato scende da 40 a 20. Aumenta l’efficienza, non il numero atteso di discendenti.'
+                : 'Le 20 unità risparmiate finanziano i due maschi aploidi aggiuntivi: quattro aploidi producono un contributo atteso di 16. Il beneficio dipende dalla disponibilità di nuove larve, cibo riutilizzabile e tempo.'}
+          </p>
+        </div>
+      </section>
+      <section className="scenario-explanation">
+        <div>
+          <h2>Quanto dipende dagli individui eliminati?</h2>
+          <p>
+            In questo modello, rinunciare ai due diploidi toglie due discendenti
+            attesi. Se il cibo viene destinato ai due aploidi aggiuntivi, ne
+            aggiunge otto: il saldo rispetto allo scenario iniziale è +6.
+          </p>
+          <p>
+            Senza riutilizzare il cibo, i discendenti attesi scendono da 10 a 8;
+            riutilizzandolo salgono a 16. Il risultato dipende quindi sia dagli
+            individui eliminati sia da come impieghiamo il risparmio.
+          </p>
+        </div>
+        <div>
+          <h2>Che cosa significa un beneficio?</h2>
+          <p>
+            Più discendenti attesi e meno cibo consumato sono due risultati
+            diversi. Nel secondo scenario risparmiamo cibo, ma il contributo
+            totale diminuisce; nel terzo aumenta, a parità di spesa iniziale.
+            Questo non misura direttamente la sopravvivenza della colonia, né la
+            sua popolazione futura: la regina partner è esterna e i discendenti
+            non diventano automaticamente membri della colonia originaria.
+          </p>
+          <p>
+            La disponibilità di cibo può influenzare anche la qualità
+            riproduttiva dei fuchi. Qui teniamo costanti le capacità per isolare
+            il confronto fra allevamento, risparmio e riutilizzo.
+          </p>
+          <p>
+            <a
+              href="https://link.springer.com/article/10.1007/s13592-014-0296-z"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Studio su alimentazione e qualità dei fuchi
+            </a>
+          </p>
+        </div>
+      </section>
+      <aside className="beekeeper-note">
+        <img
+          src="/assets/allevatore.png"
+          alt="Illustrazione di un apicoltore circondato da api"
+          width="110"
+          height="106"
+        />
+        <div>
+          <h2>Di chi sono le risorse risparmiate?</h2>
+          <p>
+            L’eliminazione delle larve diploidi è compiuta dalle operaie:
+            riguarda prima di tutto le risorse della colonia, non una scelta
+            dell’apicoltore. Può evitare di proseguire l’allevamento di
+            individui con ridotta capacità riproduttiva. Nella simulazione
+            scegliamo noi lo scenario per osservarne le conseguenze; il
+            vantaggio per la colonia dipende da come vengono usate le risorse
+            disponibili.
+          </p>
+        </div>
+      </aside>
+      <PageJourney page="survival" />
+    </main>
+  )
 }

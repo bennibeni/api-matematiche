@@ -1,29 +1,237 @@
-import React,{useState} from 'react';
-import {Navigation,PageJourney,PageHeadingLabel} from './Navigation.jsx';
-import {GenealogyBee} from './GenealogyBee.jsx';
-import {daughters,sisterRelatedness} from './polyandry.js';
-const fatherColors={A:'#438c95',B:'#966da7'};
-const number=n=>n.toFixed(2).replace('.',',');
-export default function PolyandryPage(){
- const [selected,setSelected]=useState(['O1','O2']);
- const pair=selected.map(id=>daughters.find(d=>d.id===id));
- const result=pair.length===2?sisterRelatedness(...pair):null;
- function toggle(id){setSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s.slice(-1),id]);}
- return <main className="polyandry-page"><header><Navigation page="polyandry"/></header>
- <section className="colony-intro"><PageHeadingLabel page="polyandry"/><h1>Una madre.<br/><em>Padri diversi.</em></h1><p>Le figlie di una stessa regina condividono la madre, ma possono avere padri diversi: la regina si accoppia con più fuchi e ciascuna figlia riceve il contributo di uno solo di loro.</p></section>
- <aside className="reading-note" aria-label="Da tenere a mente"><strong>Da tenere a mente</strong><p>Finora ogni antenato era distinto. Ora più figlie condividono gli stessi genitori. La madre è una sola, i padri sono due e li consideriamo non imparentati fra loro né con la regina.</p></aside>
- <section className="lab"><div className="lab-heading"><div><p className="eyebrow">UNA REGINA · DUE FUCHI · SEI FIGLIE</p><h2>Quanto sono imparentate due sorelle?</h2></div></div>
- <p className="poly-instruction">Clicca due operaie nel grafo. Una terza scelta sostituisce la prima; clicca un’operaia selezionata per deselezionarla.</p>
- <div className="poly-graph-scroll" tabIndex="0" role="region" aria-label="Grafo della famiglia, scorribile orizzontalmente"><svg viewBox="0 0 900 355" className="poly-graph" aria-label="Una regina e due fuchi, ciascuno padre di tre operaie">
- {daughters.map((d,i)=>{const x=85+i*146,active=selected.includes(d.id);return <g key={d.id} opacity={active?1:.18}><path d={`M450 86 C450 175 ${x} 175 ${x} 260`} fill="none" stroke="#b88c34" strokeWidth={active?4:2}/><path d={`M${d.father==='A'?160:740} 86 C${d.father==='A'?160:740} 205 ${x} 205 ${x} 260`} fill="none" stroke={fatherColors[d.father]} strokeWidth={active?4:2}/></g>;})}
- {[{x:160,type:'M',label:'Fuco A · M·n',color:fatherColors.A},{x:450,type:'F',label:'Regina · F',color:'#b88c34'},{x:740,type:'M',label:'Fuco B · M·n',color:fatherColors.B}].map(p=><g key={p.label}><circle cx={p.x} cy="62" r="29" fill="#fffdf6" stroke={p.color} strokeWidth="3"/><GenealogyBee type={p.type} x={p.x} y={62}/><text x={p.x} y="20" textAnchor="middle">{p.label}</text></g>)}
- {daughters.map((d,i)=><foreignObject key={d.id} x={45+i*146} y="250" width="80" height="100"><button className="poly-bee" style={{'--father-color':fatherColors[d.father]}} aria-label={`Operaia ${d.id}, padre ${d.father}`} aria-pressed={selected.includes(d.id)} onClick={()=>toggle(d.id)}><svg width="42" height="42" viewBox="-21 -21 42 42" aria-hidden="true"><GenealogyBee type="F"/></svg><strong>{d.id}</strong><small>Padre {d.father}</small></button></foreignObject>)}
- </svg></div>
- <div className="poly-key"><span>Oro: legame con la madre</span><span style={{color:fatherColors.A}}>Blu: padre A</span><span style={{color:fatherColors.B}}>Viola: padre B</span></div>
- <div className="poly-result" aria-live="polite">{result?<><div><p className="eyebrow">{selected.join(' + ')} · {result.paternal?'STESSA MADRE E STESSO PADRE':'STESSA MADRE, PADRI DIVERSI'}</p><h2>Parentela attesa: {number(result.total)}</h2></div><div className="poly-sum"><span><strong>0,25</strong>contributo materno</span><b>+</b><span><strong>{number(result.paternal)}</strong>contributo paterno</span><b>=</b><span><strong>{number(result.total)}</strong>totale</span></div><p>{result.paternal?'Condividono tutto il patrimonio ricevuto dal padre aploide. La parte materna coincide per discendenza, in media, per metà.':'I padri sono diversi e non imparentati nel modello: il contributo paterno alla parentela è zero. Resta quello della madre condivisa.'}</p></>:<p>Seleziona {2-selected.length} {selected.length===1?'altra operaia':'operaie'} per confrontare la parentela.</p>}</div>
- </section>
- <section className="scenario-explanation"><div><h2>Da dove viene 0,75?</h2><p>Ogni figlia riceve metà del proprio patrimonio nucleare dalla madre e metà dal padre. Un fuco aploide trasmette alle figlie lo stesso patrimonio paterno, salvo mutazioni: questa metà contribuisce per 0,50.</p><p>La regina possiede due copie di ciascun cromosoma. In una determinata posizione del DNA, chiamata <em>locus</em>, due figlie hanno probabilità ½ di ricevere la stessa copia materna: ½ × ½ = ¼. Sommando: ½ + ¼ = ¾.</p></div><div><h2>Che cosa misura questo numero?</h2><p>È un coefficiente atteso di parentela genetica per discendenza. Non è la percentuale di sequenze di DNA identiche, né una misura dell’affetto o della collaborazione fra api.</p><p>Assumiamo genitori non consanguinei e non imparentati fra loro, fuchi aploidi e sei figlie operaie. I gruppi di tre servono al confronto: non descrivono le proporzioni di una colonia reale. Le combinazioni materne variano; i valori mostrati sono medie attese.</p></div></section>
- <p className="scenario-note">Qui i genitori sono condivisi fra più figlie: è una famiglia con due gruppi paterni. La condizione dei rami sempre distinti dell’albero di Fibonacci non si applica.</p>
- <section className="reading-conclusion"><h2>Che cosa ci dice il confronto?</h2><p>Abbiamo confrontato la parentela genetica attesa fra due operaie: 0,75 se condividono anche il padre, 0,25 se condividono soltanto la madre. Il numero di genitori di ciascuna resta due: cambia quali genitori hanno in comune.</p></section>
- <PageJourney page="polyandry"/></main>;
+import React, { useState } from 'react'
+import { Navigation, PageJourney, PageHeadingLabel } from './Navigation.jsx'
+import { GenealogyBee } from './GenealogyBee.jsx'
+import { daughters, sisterRelatedness } from './polyandry.js'
+const fatherColors = { A: '#438c95', B: '#966da7' }
+const number = (n) => n.toFixed(2).replace('.', ',')
+export default function PolyandryPage() {
+  const [selected, setSelected] = useState(['O1', 'O2'])
+  const pair = selected.map((id) => daughters.find((d) => d.id === id))
+  const result = pair.length === 2 ? sisterRelatedness(...pair) : null
+  function toggle(id) {
+    setSelected((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s.slice(-1), id],
+    )
+  }
+  return (
+    <main className="polyandry-page">
+      <header>
+        <Navigation page="polyandry" />
+      </header>
+      <section className="colony-intro">
+        <PageHeadingLabel page="polyandry" />
+        <h1>
+          Una madre.
+          <br />
+          <em>Padri diversi.</em>
+        </h1>
+        <p>
+          Le figlie di una stessa regina condividono la madre, ma possono avere
+          padri diversi: la regina si accoppia con più fuchi e ciascuna figlia
+          riceve il contributo di uno solo di loro.
+        </p>
+      </section>
+      <aside className="reading-note" aria-label="Da tenere a mente">
+        <strong>Da tenere a mente</strong>
+        <p>
+          Finora ogni antenato era distinto. Ora più figlie condividono gli
+          stessi genitori. La madre è una sola, i padri sono due e li
+          consideriamo non imparentati fra loro né con la regina.
+        </p>
+      </aside>
+      <section className="lab">
+        <div className="lab-heading">
+          <div>
+            <p className="eyebrow">UNA REGINA · DUE FUCHI · SEI FIGLIE</p>
+            <h2>Quanto sono imparentate due sorelle?</h2>
+          </div>
+        </div>
+        <p className="poly-instruction">
+          Clicca due operaie nel grafo. Una terza scelta sostituisce la prima;
+          clicca un’operaia selezionata per deselezionarla.
+        </p>
+        <div
+          className="poly-graph-scroll"
+          tabIndex="0"
+          role="region"
+          aria-label="Grafo della famiglia, scorribile orizzontalmente"
+        >
+          <svg
+            viewBox="0 0 900 355"
+            className="poly-graph"
+            aria-label="Una regina e due fuchi, ciascuno padre di tre operaie"
+          >
+            {daughters.map((d, i) => {
+              const x = 85 + i * 146,
+                active = selected.includes(d.id)
+              return (
+                <g key={d.id} opacity={active ? 1 : 0.18}>
+                  <path
+                    d={`M450 86 C450 175 ${x} 175 ${x} 260`}
+                    fill="none"
+                    stroke="#b88c34"
+                    strokeWidth={active ? 4 : 2}
+                  />
+                  <path
+                    d={`M${d.father === 'A' ? 160 : 740} 86 C${d.father === 'A' ? 160 : 740} 205 ${x} 205 ${x} 260`}
+                    fill="none"
+                    stroke={fatherColors[d.father]}
+                    strokeWidth={active ? 4 : 2}
+                  />
+                </g>
+              )
+            })}
+            {[
+              {
+                x: 160,
+                type: 'M',
+                label: 'Fuco A · M·n',
+                color: fatherColors.A,
+              },
+              { x: 450, type: 'F', label: 'Regina · F', color: '#b88c34' },
+              {
+                x: 740,
+                type: 'M',
+                label: 'Fuco B · M·n',
+                color: fatherColors.B,
+              },
+            ].map((p) => (
+              <g key={p.label}>
+                <circle
+                  cx={p.x}
+                  cy="62"
+                  r="29"
+                  fill="#fffdf6"
+                  stroke={p.color}
+                  strokeWidth="3"
+                />
+                <GenealogyBee type={p.type} x={p.x} y={62} />
+                <text x={p.x} y="20" textAnchor="middle">
+                  {p.label}
+                </text>
+              </g>
+            ))}
+            {daughters.map((d, i) => (
+              <foreignObject
+                key={d.id}
+                x={45 + i * 146}
+                y="250"
+                width="80"
+                height="100"
+              >
+                <button
+                  className="poly-bee"
+                  style={{ '--father-color': fatherColors[d.father] }}
+                  aria-label={`Operaia ${d.id}, padre ${d.father}`}
+                  aria-pressed={selected.includes(d.id)}
+                  onClick={() => toggle(d.id)}
+                >
+                  <svg
+                    width="42"
+                    height="42"
+                    viewBox="-21 -21 42 42"
+                    aria-hidden="true"
+                  >
+                    <GenealogyBee type="F" />
+                  </svg>
+                  <strong>{d.id}</strong>
+                  <small>Padre {d.father}</small>
+                </button>
+              </foreignObject>
+            ))}
+          </svg>
+        </div>
+        <div className="poly-key">
+          <span>Oro: legame con la madre</span>
+          <span style={{ color: fatherColors.A }}>Blu: padre A</span>
+          <span style={{ color: fatherColors.B }}>Viola: padre B</span>
+        </div>
+        <div className="poly-result" aria-live="polite">
+          {result ? (
+            <>
+              <div>
+                <p className="eyebrow">
+                  {selected.join(' + ')} ·{' '}
+                  {result.paternal
+                    ? 'STESSA MADRE E STESSO PADRE'
+                    : 'STESSA MADRE, PADRI DIVERSI'}
+                </p>
+                <h2>Parentela attesa: {number(result.total)}</h2>
+              </div>
+              <div className="poly-sum">
+                <span>
+                  <strong>0,25</strong>contributo materno
+                </span>
+                <b>+</b>
+                <span>
+                  <strong>{number(result.paternal)}</strong>contributo paterno
+                </span>
+                <b>=</b>
+                <span>
+                  <strong>{number(result.total)}</strong>totale
+                </span>
+              </div>
+              <p>
+                {result.paternal
+                  ? 'Condividono tutto il patrimonio ricevuto dal padre aploide. La parte materna coincide per discendenza, in media, per metà.'
+                  : 'I padri sono diversi e non imparentati nel modello: il contributo paterno alla parentela è zero. Resta quello della madre condivisa.'}
+              </p>
+            </>
+          ) : (
+            <p>
+              Seleziona {2 - selected.length}{' '}
+              {selected.length === 1 ? 'altra operaia' : 'operaie'} per
+              confrontare la parentela.
+            </p>
+          )}
+        </div>
+      </section>
+      <section className="scenario-explanation">
+        <div>
+          <h2>Da dove viene 0,75?</h2>
+          <p>
+            Ogni figlia riceve metà del proprio patrimonio nucleare dalla madre
+            e metà dal padre. Un fuco aploide trasmette alle figlie lo stesso
+            patrimonio paterno, salvo mutazioni: questa metà contribuisce per
+            0,50.
+          </p>
+          <p>
+            La regina possiede due copie di ciascun cromosoma. In una
+            determinata posizione del DNA, chiamata <em>locus</em>, due figlie
+            hanno probabilità ½ di ricevere la stessa copia materna: ½ × ½ = ¼.
+            Sommando: ½ + ¼ = ¾.
+          </p>
+        </div>
+        <div>
+          <h2>Che cosa misura questo numero?</h2>
+          <p>
+            È un coefficiente atteso di parentela genetica per discendenza. Non
+            è la percentuale di sequenze di DNA identiche, né una misura
+            dell’affetto o della collaborazione fra api.
+          </p>
+          <p>
+            Assumiamo genitori non consanguinei e non imparentati fra loro,
+            fuchi aploidi e sei figlie operaie. I gruppi di tre servono al
+            confronto: non descrivono le proporzioni di una colonia reale. Le
+            combinazioni materne variano; i valori mostrati sono medie attese.
+          </p>
+        </div>
+      </section>
+      <p className="scenario-note">
+        Qui i genitori sono condivisi fra più figlie: è una famiglia con due
+        gruppi paterni. La condizione dei rami sempre distinti dell’albero di
+        Fibonacci non si applica.
+      </p>
+      <section className="reading-conclusion">
+        <h2>Che cosa ci dice il confronto?</h2>
+        <p>
+          Abbiamo confrontato la parentela genetica attesa fra due operaie: 0,75
+          se condividono anche il padre, 0,25 se condividono soltanto la madre.
+          Il numero di genitori di ciascuna resta due: cambia quali genitori
+          hanno in comune.
+        </p>
+      </section>
+      <PageJourney page="polyandry" />
+    </main>
+  )
 }
