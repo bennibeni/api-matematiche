@@ -1,7 +1,3 @@
-// Alternative genealogies, not the removal of ancestors of an existing bee.
-export function ancestralScenario(filtered=false,depth=6){
- return formulaAncestry(filtered?[]:['mp'],depth);
-}
 export const editableAncestors=['mp','mmp','mmmp'];
 export function formulaAncestry(active=editableAncestors,depth=6){
  if(!Number.isInteger(depth)||depth<3||depth>8)throw new RangeError('Profondità da 3 a 8.');

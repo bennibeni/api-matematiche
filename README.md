@@ -27,13 +27,24 @@ La pagina `#/una-femmina-senza-padre` confronta il modello standard con una sola
 
 La vista è fissa fino a g6 e un solo interruttore attiva/disattiva l'evento. I conteggi alternativi sono 1,1,1,2,3,5,8. La differenza da g2 è la successione 1,1,2,3,5 del ramo paterno assente. I test verificano la conservazione di ogni altra lista di genitori e l'identità esatta del sottoalbero assente. Le fonti biologiche sono collegate nella pagina; il modello riguarda solo i legami genealogici.
 
-## Eliminazione larvale
+## Larve e risorse
 
-La pagina `#/genealogia-e-sopravvivenza` confronta due grafi della stessa famiglia: 24 discendenti iniziali e gli individui rimasti dopo le eliminazioni selezionate. I nodi D1–D8 si possono eliminare e ripristinare singolarmente; tre comandi selezionano nessuna, una o tutte le otto eliminazioni. I collegamenti del grafo iniziale conservano la genealogia.
+La pagina `#/genealogia-e-sopravvivenza` usa `resourceExperiment.js` per confrontare tre scenari a parametri fissi. Con 40 unità disponibili e un costo di 10 per maschio allevato:
 
-Il campione illustrativo è fissato: 8 maschi aploidi, 8 maschi diploidi e 8 future operaie, con regina A/B e padre A. Non rappresenta una distribuzione tipica della colonia. Le eliminazioni riguardano le larve; le immagini adulte identificano i gruppi. Non sono simulate generazioni successive. Regina e padre sono esclusi dal conteggio.
+| Scenario | Maschi allevati | Cibo impiegato | Cibo rimasto | Figli attesi |
+| --- | ---: | ---: | ---: | ---: |
+| Senza eliminazioni | 4 | 40 | 0 | 10 |
+| Eliminare e conservare | 2 | 20 | 20 | 8 |
+| Eliminare e riutilizzare | 4 | 40 | 0 | 16 |
 
-Le illustrazioni naturalistiche di fuco, operaia e regina sono in `public/assets/bees`; il README della cartella documenta i prompt. I due gruppi maschili condividono il disegno: la ploidia è indicata dalle etichette. I test verificano selezioni da zero a otto, identità, parentela e mantenimento degli altri gruppi.
+Il contributo convenzionale è di quattro figli per maschio aploide e uno per maschio diploide, per periodi riproduttivi della stessa durata. Le due larve aploidi aggiuntive sono disponibili per un allevamento successivo. Il modello assume tempo e opportunità riproduttive sufficienti; non simula eredità genetica, crescita della colonia o sopravvivenza. I test verificano il bilancio e distinguono risparmio, efficienza e contributo totale.
 
-### Discendenza controllata
-La pagina ora mostra sei api selezionabili per gruppo (due maschi aploidi, due diploidi e due operaie: sei in totale) e un grafo collegato alle eliminazioni di D1/D2. Il grafo ha due coppie iniziali, una figlia riproduttrice per coppia e un figlio aploide per figlia. La riproduzione dei diploidi è un controfattuale matematico dichiarato, non un modello genetico realistico. Le partner Q1/Q2 sono esterne alla popolazione iniziale; non si sostituiscono padri assenti. Il grafo ha al massimo otto nodi e tre livelli; i nodi non realizzati rimangono tratteggiati per il confronto.
+## Organizzazione del codice
+
+- `pages.js`: percorso, etichette del menu e route condivise.
+- `Navigation.jsx`: menu, etichette sopra i titoli e collegamenti fra pagine.
+- `model.js`, `uniparental.js`, `polyandry.js`, `csd.js`, `resourceExperiment.js`, `ancestralScenarios.js`, `spiral.js`: modelli delle sette pagine e relativi test.
+- `GenealogyBee.jsx`: simboli dei grafi genealogici; `beeAssets.js`: illustrazioni della popolazione.
+- `style.css`: stili condivisi e regole responsive. L'ordine delle regole fa parte della cascata: preservarlo quando si riordinano gli stili.
+
+I modelli delle precedenti versioni della colonia sono stati rimossi insieme ai soli test che li riguardavano. I controlli della ricorrenza operano direttamente su `formulaAncestry`.

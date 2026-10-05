@@ -1,7 +1,7 @@
 export const resourceScenarios=[
- {id:'all',label:'Allevare tutti',description:'Due aploidi e due diploidi.'},
- {id:'save',label:'Eliminare e conservare',description:'Due aploidi; il cibo risparmiato resta disponibile.'},
- {id:'reinvest',label:'Eliminare e riallocare',description:'Il risparmio permette di allevare altri due aploidi.'},
+ {id:'all',label:'Allevare senza eliminazioni',description:'Alleviamo anche i due maschi diploidi: il cibo disponibile viene impiegato tutto.'},
+ {id:'save',label:'Eliminare i diploidi e conservare',description:'I due maschi diploidi vengono eliminati da larve; conserviamo le 20 unità risparmiate.'},
+ {id:'reinvest',label:'Eliminare i diploidi e riutilizzare',description:'I due maschi diploidi vengono eliminati da larve; il cibo risparmiato permette un allevamento successivo di due aploidi.'},
 ];
 export function resourceExperiment(scenario='all'){
  if(!resourceScenarios.some(s=>s.id===scenario))throw new Error('Scenario non valido');
