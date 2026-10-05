@@ -8,6 +8,7 @@ import { Navigation, PageHeadingLabel, PageJourney } from './Navigation.jsx'
 import { journey, pageLabel } from './pages.js'
 import PolyandryPage from './PolyandryPage.jsx'
 import SpiralPage from './SpiralPage.jsx'
+import SharedAncestryPage from './SharedAncestryPage.jsx'
 import './style.css'
 import SurvivalPage from './SurvivalPage.jsx'
 import UniparentalPage from './UniparentalPage.jsx'
@@ -447,11 +448,14 @@ function Pages() {
     const scenarios = hash === '#/scenari-genealogici'
     const polyandry = hash === '#/poliandria'
     const spiral = hash === '#/spirale-aurea'
+    const shared = hash === '#/antenati-condivisi'
     useEffect(() => {
         const id = journey.find((page) => page[1] === hash)?.[0] ?? 'fibonacci'
         document.title = pageLabel(id) + ' · Api matematiche'
     }, [hash])
-    return polyandry ? (
+    return shared ? (
+        <SharedAncestryPage />
+    ) : polyandry ? (
         <PolyandryPage />
     ) : spiral ? (
         <SpiralPage />

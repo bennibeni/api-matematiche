@@ -6,6 +6,7 @@ export const journey = [
   ['survival', '#/genealogia-e-sopravvivenza', 'Larve e risorse'],
   ['scenarios', '#/scenari-genealogici', 'Genealogia e diploidia'],
   ['spiral', '#/spirale-aurea', 'Rappresentazione geometrica'],
+  ['shared', '#/antenati-condivisi', 'Identità e percorsi'],
 ]
 
 export function pageLabel(id) {
