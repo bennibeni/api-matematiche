@@ -84,8 +84,8 @@ export default function SharedAncestryPage() {
           Disattiva e riattiva la casella: le 13 immagini di gen.6 restano al
           loro posto, ma le api diverse passano da 13 a 8. Esploriamo questi
           percorsi come una partitura: i numeri assegnati alle generazioni
-          determinano i suoni. Per ora la condivisione cambia le identità, ma
-          non i numeri né la musica.
+          determinano i suoni. Il teletrasporto fra nodi gemelli aggiunge
+          escursioni musicali, mantenendo gli stessi numeri per generazione.
         </p>
       </aside>
       <div className="uniparental-toggle">
@@ -165,7 +165,7 @@ export default function SharedAncestryPage() {
         </label>
         <p className="shared-selection" aria-live="polite">
           {sounding
-            ? 'Durante l’ascolto sono visibili tutti i percorsi. Il cerchio arancione indica la posizione suonata; la linea arancione è il collegamento appena percorso.'
+            ? 'Durante l’ascolto sono visibili tutti i percorsi. Il cerchio arancione indica la posizione suonata; la linea arancione è il collegamento appena percorso. Il tratteggio indica un teletrasporto fra gemelli.'
             : chosen
               ? `${chosen.label} · gen.${chosen.generation} · ${chosen.occurrences.length} ${chosen.occurrences.length === 1 ? 'immagine' : 'immagini'} in ciascun disegno. Contorno rosso: ape selezionata. ${highlightPaths ? 'Sono visibili solo i percorsi che passano da lei.' : 'Tutti i percorsi restano visibili.'}`
               : 'Tutti i percorsi sono visibili. Il contorno viola identifica le api che compaiono in più posizioni.'}
@@ -246,6 +246,14 @@ export default function SharedAncestryPage() {
                         />
                       )
                     }),
+                  )}
+                  {sounding?.direction.startsWith('teleport') && (
+                    <line x1={byId.get(sounding.fromId).x} y1={byId.get(sounding.fromId).y}
+                      x2={byId.get(sounding.id).x} y2={byId.get(sounding.id).y}
+                      stroke="#bd6717" strokeWidth="4" strokeDasharray="8 6"
+                      vectorEffect="non-scaling-stroke">
+                      <title>Teletrasporto fra gemelli</title>
+                    </line>
                   )}
                   {model.points.map((point) => {
                     const bee = model.individuals.get(point.identity)

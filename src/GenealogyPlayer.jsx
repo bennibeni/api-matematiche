@@ -21,6 +21,7 @@ export default function GenealogyPlayer({
 }) {
   const [noteIndex, setNoteIndex] = useState(0)
   const [timbre, setTimbre] = useState('swarm')
+  const [teleportTwins, setTeleportTwins] = useState(true)
   const [playing, setPlaying] = useState(false)
   const [step, setStep] = useState(null)
   const [message, setMessage] = useState(
@@ -30,7 +31,7 @@ export default function GenealogyPlayer({
   const frame = useRef(null)
   const run = useRef(0)
   const note = startingNotes[noteIndex]
-  const score = depthFirstScore(model, note.frequency, selectedIdentity)
+  const score = depthFirstScore(model, note.frequency, selectedIdentity, teleportTwins)
 
   function release() {
     run.current++
@@ -48,7 +49,7 @@ export default function GenealogyPlayer({
     setStep(null)
     onStep(null)
     setMessage('Percorso aggiornato. Avvia l’ascolto per esplorarlo.')
-  }, [model, selectedIdentity])
+  }, [model, selectedIdentity, teleportTwins])
 
   function stop() {
     release()
@@ -145,6 +146,17 @@ export default function GenealogyPlayer({
             ': suoniamo i percorsi che passano da questa ape, dai collegamenti con il maschio iniziale fino ai suoi antenati.'}{' '}
         La visita segue ogni ramo in profondità e suona anche i ritorni.
       </p>
+      <label className="prominent-check">
+        <input type="checkbox" checked={teleportTwins} disabled={playing}
+          onChange={event => setTeleportTwins(event.target.checked)} />
+        Teletrasporto tra gemelli
+      </label>
+      <p>Chiamiamo gemelli due nodi che rappresentano la stessa ape. Con il
+        teletrasporto attivo, all’arrivo saltiamo al gemello, esploriamo tutti
+        i suoi rami e torniamo al nodo originale per proseguire anche i suoi.
+        Ogni salto alza la melodia di una quinta giusta (7 semitoni), per tutta
+        l’escursione. Al ritorno si ripristina il registro precedente. Le
+        quinte dei salti annidati si sommano. I ritorni non avviano nuovi salti.</p>
       <div className="music-timbre-choice">
         <label className="starting-note">
           Timbro
@@ -153,12 +165,12 @@ export default function GenealogyPlayer({
             disabled={playing}
             onChange={(event) => setTimbre(event.target.value)}
           >
-            <option value="swarm">Ronzio staccato</option>
+            <option value="swarm">Ronzio</option>
             <option value="pure">Tono puro</option>
           </select>
         </label>
         <span>
-          Ogni nota è un breve ronzio, separato dalla successiva da una pausa.
+          Ronzio accompagna ogni nota con un suono di volo; Tono puro permette di confrontare le sole altezze.
         </span>
       </div>
       <div className="shared-actions">
@@ -192,15 +204,18 @@ export default function GenealogyPlayer({
       <details className="music-details">
         <summary>Note, frequenze e dettagli dell’esperimento</summary>
         <p>
-          Il timbro ronzante appartiene alle note della melodia: armoniche,
-          lievi scordature e pulsazioni ne rendono il suono più ruvido. Ogni
-          nota dura 0,3 secondi ed è seguita da 0,2 secondi di silenzio. È una
-          sintesi sperimentale ispirata alle api.
+          “Ronzio” combina una nota pura con un ronzio grave e
+          irregolare, che si accende e si spegne insieme alla nota. Il ronzio
+          mantiene il suo registro mentre la melodia segue Fibonacci: le
+          frequenze mostrate si riferiscono alla nota, non alla texture.
+          Il suono dura 0,36 secondi, seguito da 0,14 secondi di pausa.
+          Il ronzio è sintetizzato.
+          Il tono puro conserva 0,3 secondi di suono e 0,2 di pausa.
         </p>
         <div className="music-notes-scroll">
           <table className="music-notes">
             <caption>
-              Le note delle generazioni · riferimento: temperamento equabile,
+              Le note delle generazioni senza trasposizione · riferimento: temperamento equabile,
               La4 = 440 Hz
             </caption>
             <thead>
@@ -272,13 +287,17 @@ export default function GenealogyPlayer({
                   ? 'Verso gli antenati'
                   : step.direction === 'return'
                     ? 'Ritorno verso il maschio iniziale'
-                    : 'Partenza'}{' '}
-                · numero {step.value}
+                    : step.direction === 'teleport'
+                      ? 'Teletrasporto al gemello · +7 semitoni'
+                      : step.direction === 'teleport-return'
+                        ? 'Ritorno dal gemello · −7 semitoni'
+                        : 'Partenza'}{' '}
+                · numero {step.value} · trasposizione attuale +{step.transposeSemitones} semitoni
               </span>
               <span>
                 {step.direction === 'start'
                   ? `${format(step.frequency)} Hz`
-                  : `${format(step.frequency / step.ratio)} Hz × ${step.value}/${step.previousValue} = ${format(step.frequency)} Hz`}
+                  : `${format(step.frequency / step.ratio)} Hz × ${format(step.ratio)} = ${format(step.frequency)} Hz`}
               </span>
             </>
           ) : (
@@ -288,8 +307,8 @@ export default function GenealogyPlayer({
                 secondi
               </strong>
               <span>
-                Do centrale = Do4. La nota iniziale predefinita è Do3, un’ottava
-                più bassa.
+                Do centrale = Do4. La nota iniziale predefinita è Do2, due ottave
+                più in basso.
               </span>
             </>
           )}
@@ -308,8 +327,10 @@ export default function GenealogyPlayer({
             Qui usiamo f(arrivo) = f(partenza) × numero(arrivo) /
             numero(partenza). Da 2 a 3 il rapporto è 3/2; al ritorno è 2/3. I
             fattori si semplificano lungo il percorso: in questa versione
-            f(gen.g) = f(iniziale) × numero(gen.g). La stessa generazione ha
-            sempre lo stesso suono.
+            f(gen.g) = f(iniziale) × numero(gen.g) × 2^(s/12), dove s è
+            la trasposizione accumulata nei salti al gemello ancora aperti.
+            Ogni salto aggiunge 7 semitoni; il suo ritorno ripristina il valore
+            precedente. Il buzz mantiene il proprio registro.
           </p>
           <p>
             Un intervallo di s semitoni nel temperamento equabile usa invece il
@@ -322,9 +343,7 @@ export default function GenealogyPlayer({
             Scegliere la nota iniziale trasporta l’intero brano; non imposta
             ancora una tonalità maggiore o minore. Le altre frequenze non
             vengono arrotondate ai tasti del pianoforte. Con questi numeri per
-            generazione, condividere l’antenata cambia le identità ma non la
-            sequenza sonora: è il riferimento di partenza per i prossimi
-            esperimenti.
+            generazione, il teletrasporto aggiunge escursioni nei rami condivisi trasposte di una quinta. Disattivalo per ascoltare il percorso originale.
           </p>
         </details>
       </details>
@@ -334,7 +353,10 @@ export default function GenealogyPlayer({
           aria-label="Controlli durante l’ascolto"
         >
           <MusicStaff score={score} index={step.index} compact />
-          <span>{pitchLabel(step.frequency)}</span>
+          <span>{pitchLabel(step.frequency)}
+            {step.direction === 'teleport' && ' · Salto al gemello: +7 semitoni'}
+            {step.direction === 'teleport-return' && ' · Ritorno dal gemello: −7 semitoni'}
+          </span>
           <button onClick={stop}>Ferma l’ascolto</button>
         </div>
       )}

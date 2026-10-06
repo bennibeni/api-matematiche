@@ -75,6 +75,13 @@ export default function SharedGenealogyGraph({
               )
             }),
           )}
+          {step?.direction.startsWith('teleport') && (
+            <line x1={layout.nodes[step.fromId].x} y1={y(step.generation)}
+              x2={layout.nodes[step.id].x} y2={y(step.generation)}
+              stroke="#bd6717" strokeWidth="4" strokeDasharray="8 6">
+              <title>Teletrasporto fra gemelli</title>
+            </line>
+          )}
           {model.points.map((point) => {
             const bee = model.individuals.get(point.identity)
             const active = point.identity === identity
