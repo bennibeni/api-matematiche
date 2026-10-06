@@ -17,7 +17,8 @@ export function scheduleBeeNote(context, destination, frequency, at, timbre) {
   }
   const real = new Float32Array(17)
   const imag = new Float32Array(17)
-  for (let h = 1; h < imag.length; h++) imag[h] = Math.exp(-h / 6) / Math.sqrt(h)
+  for (let h = 1; h < imag.length; h++)
+    imag[h] = Math.exp(-h / 6) / Math.sqrt(h)
   const wave = context.createPeriodicWave(real, imag)
   for (const [i, cents] of [-7, 0, 7].entries()) {
     const voice = context.createOscillator()
