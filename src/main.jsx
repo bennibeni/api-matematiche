@@ -385,9 +385,6 @@ function App() {
         </div>
       </section>
       <PageJourney page="fibonacci" />
-      <footer className="projects-footer">
-        <a href="https://links-page-bennibeni.vercel.app/">&larr; All projects</a>
-      </footer>
     </main>
   );
 }

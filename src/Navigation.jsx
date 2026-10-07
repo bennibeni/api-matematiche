@@ -1,5 +1,5 @@
-import React from 'react'
-import { journey, pageLabel } from './pages.js'
+import React from 'react';
+import { journey, pageLabel } from './pages.js';
 export function Navigation({ page }) {
   return (
     <nav className="page-nav" aria-label="Pagine del laboratorio">
@@ -9,23 +9,28 @@ export function Navigation({ page }) {
         </a>
       ))}
     </nav>
-  )
+  );
 }
 export function PageHeadingLabel({ page }) {
-  return <p className="page-heading-label">{pageLabel(page)}</p>
+  return <p className="page-heading-label">{pageLabel(page)}</p>;
 }
 export function PageJourney({ page }) {
   const i = journey.findIndex((p) => p[0] === page),
     previous = journey[i - 1],
-    next = journey[i + 1]
+    next = journey[i + 1];
   return (
-    <nav className="page-journey" aria-label="Continua il percorso">
-      {previous ? <a href={previous[1]}>← {previous[2]}</a> : <span />}
-      {next ? (
-        <a href={next[1]}>{next[2]} →</a>
-      ) : (
-        <a href="#/">Torna alla genealogia standard ↺</a>
-      )}
-    </nav>
-  )
+    <>
+      <nav className="page-journey" aria-label="Continua il percorso">
+        {previous ? <a href={previous[1]}>← {previous[2]}</a> : <span />}
+        {next ? (
+          <a href={next[1]}>{next[2]} →</a>
+        ) : (
+          <a href="#/">Torna alla genealogia standard ↺</a>
+        )}
+      </nav>
+      <footer className="projects-footer">
+        <a href="https://links-page-bennibeni.vercel.app/">&larr; All projects</a>
+      </footer>
+    </>
+  );
 }

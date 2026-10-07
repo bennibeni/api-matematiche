@@ -2306,10 +2306,12 @@ footer {
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
   align-items: center;
   gap: 18px;
-  width: max-content;
+  width: 720px;
+  box-sizing: border-box;
   max-width: calc(100vw - 24px);
   padding: 12px 18px;
   background: #fffdf8;
@@ -2411,19 +2413,124 @@ footer {
 .music-transport .music-staff {
   margin: 0;
   padding: 0 8px;
-  width: 390px;
-  max-width: 55vw;
-  flex-shrink: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  grid-row: 1 / 3;
 }
 .music-transport .music-staff svg {
   max-height: 115px;
 }
 @media (max-width: 650px) {
   .music-transport {
-    flex-wrap: wrap;
+    grid-template-columns: minmax(0, 1fr);
   }
   .music-transport .music-staff {
+    grid-row: auto;
     width: 100%;
     max-width: 100%;
+  }
+}
+
+.music-options {
+  border-block: 1px solid #d0d7bf;
+  padding-bottom: 14px;
+}
+.music-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 13px;
+}
+.music-progress progress {
+  width: 100%;
+  accent-color: #657b4b;
+  height: 12px;
+}
+.music-discovery {
+  padding: 14px;
+  background: #fffdf8;
+  border-radius: 8px;
+}
+.shared-insight > summary {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.music-transport-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.music-transport-direction {
+  min-height: 3em;
+}
+
+.shared-view-switch[hidden] {
+  display: none;
+}
+.shared-actions .queen-play {
+  width: 154px;
+  height: 154px;
+  flex: 0 0 auto;
+  align-self: center;
+  border-radius: 50%;
+  border: 2px solid #b49043;
+  background: #f8efd4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 20px;
+  font-weight: 600;
+  box-shadow: 0 5px 18px #70572520;
+}
+.queen-play img {
+  width: 96px;
+  height: 90px;
+  object-fit: contain;
+}
+.queen-stop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.queen-stop img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+.queen-play img,
+.queen-stop img {
+  transform-origin: center;
+}
+
+.genealogy-player .music-main-controls {
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 24px;
+  margin-block: 20px;
+}
+@media (max-width: 450px) {
+  .genealogy-player .music-main-controls {
+    gap: 12px;
+  }
+  .music-main-controls .queen-play {
+    width: 120px;
+    height: 120px;
+  }
+  .music-main-controls .queen-play img {
+    width: 72px;
+    height: 66px;
+  }
+  .music-main-controls .starting-note select {
+    max-width: 140px;
   }
 }

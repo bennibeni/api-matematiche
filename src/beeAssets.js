@@ -23,10 +23,11 @@ export const beeGroups = {
     color: '#8a789e',
     background: '#ece6f1',
   },
-}
+};
 export const beeAssets = {
   haploid: '/assets/bees/drone-anatomy-medium.png',
   diploid: '/assets/bees/drone.png',
   worker: '/assets/bees/worker.png',
   queen: '/assets/bees/queen-large.png',
-}
+  queenWingsOpen: '/assets/bees/queen-wings-open.png',
+};

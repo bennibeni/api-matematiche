@@ -6,9 +6,9 @@ export const journey = [
   ['survival', '#/genealogia-e-sopravvivenza', 'Larve e risorse'],
   ['scenarios', '#/scenari-genealogici', 'Genealogia e diploidia'],
   ['spiral', '#/spirale-aurea', 'Rappresentazione geometrica'],
-  ['shared', '#/antenati-condivisi', 'Identità e percorsi'],
-]
+  ['shared', '#/antenati-condivisi', 'Antenate e discendenti'],
+];
 
 export function pageLabel(id) {
-  return journey.find((page) => page[0] === id)?.[2] ?? 'Regole genealogiche'
+  return journey.find((page) => page[0] === id)?.[2] ?? 'Regole genealogiche';
 }

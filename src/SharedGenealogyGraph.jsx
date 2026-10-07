@@ -1,10 +1,10 @@
-import React from 'react'
-import { buildTree } from './model.js'
-import { GenealogyBee } from './GenealogyBee.jsx'
+import React from 'react';
+import { buildTree } from './model.js';
+import { GenealogyBee } from './GenealogyBee.jsx';
 
 // Same occurrence IDs as the spiral; only the coordinates change.
-const layout = buildTree(6)
-const y = (generation) => 45 + generation * 85
+const layout = buildTree(6);
+const y = (generation) => 45 + generation * 85;
 
 export default function SharedGenealogyGraph({
   model,
@@ -12,14 +12,16 @@ export default function SharedGenealogyGraph({
   related,
   onSelect,
   step,
+  controls,
 }) {
   return (
     <section className="shared-tree-view" aria-labelledby="shared-tree-title">
       <h3 id="shared-tree-title">Il grafo genealogico</h3>
       <p className="shared-caption">
-        Verso gli antenati ↓ · La stessa etichetta indica la stessa ape, anche
-        quando compare in due rami.
+        Verso gli antenati ↓ · Scendendo nel grafo aumentano gli indici di generazione: risaliamo
+        nel passato, da figli a genitori.
       </p>
+      {controls}
       <div
         className="shared-tree-scroll"
         tabIndex="0"
@@ -32,25 +34,20 @@ export default function SharedGenealogyGraph({
           aria-label="Grafo delle stesse api rappresentate sulla spirale"
         >
           {model.rows.map((row) => (
-            <text
-              key={row.generation}
-              x="18"
-              y={y(row.generation) + 4}
-              className="generation"
-            >
+            <text key={row.generation} x="18" y={y(row.generation) + 4} className="generation">
               gen.{row.generation}
             </text>
           ))}
           {model.points.flatMap((point) =>
             point.parents.map((id) => {
-              const parent = model.points.find((node) => node.id === id)
-              const active = related(point) && related(parent)
-              if (!active) return null
+              const parent = model.points.find((node) => node.id === id);
+              const active = related(point) && related(parent);
+              if (!active) return null;
               const x1 = layout.nodes[point.id].x,
-                x2 = layout.nodes[id].x
+                x2 = layout.nodes[id].x;
               const y1 = y(point.generation),
                 y2 = y(parent.generation),
-                middle = (y1 + y2) / 2
+                middle = (y1 + y2) / 2;
               return (
                 <path
                   key={`${point.id}-${id}`}
@@ -72,22 +69,28 @@ export default function SharedGenealogyGraph({
                   }
                   opacity=".7"
                 />
-              )
+              );
             }),
           )}
           {step?.direction.startsWith('teleport') && (
-            <line x1={layout.nodes[step.fromId].x} y1={y(step.generation)}
-              x2={layout.nodes[step.id].x} y2={y(step.generation)}
-              stroke="#bd6717" strokeWidth="4" strokeDasharray="8 6">
-              <title>Teletrasporto fra gemelli</title>
+            <line
+              x1={layout.nodes[step.fromId].x}
+              y1={y(step.generation)}
+              x2={layout.nodes[step.id].x}
+              y2={y(step.generation)}
+              stroke="#bd6717"
+              strokeWidth="4"
+              strokeDasharray="8 6"
+            >
+              <title>Salto tra duplicati</title>
             </line>
           )}
           {model.points.map((point) => {
-            const bee = model.individuals.get(point.identity)
-            const active = point.identity === identity
-            const x = layout.nodes[point.id].x
-            const cy = y(point.generation)
-            if (!related(point)) return null
+            const bee = model.individuals.get(point.identity);
+            const active = point.identity === identity;
+            const x = layout.nodes[point.id].x;
+            const cy = y(point.generation);
+            if (!related(point)) return null;
             return (
               <g
                 key={point.id}
@@ -100,8 +103,8 @@ export default function SharedGenealogyGraph({
                 onClick={() => onSelect(point.identity)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault()
-                    onSelect(point.identity)
+                    event.preventDefault();
+                    onSelect(point.identity);
                   }
                 }}
               >
@@ -111,13 +114,7 @@ export default function SharedGenealogyGraph({
                   cy={cy}
                   r={active ? 24 : 21}
                   fill={bee.occurrences.length > 1 ? '#925c87' : '#fffdf6'}
-                  stroke={
-                    active
-                      ? '#bc3434'
-                      : bee.occurrences.length > 1
-                        ? '#925c87'
-                        : '#9ca98d'
-                  }
+                  stroke={active ? '#bc3434' : bee.occurrences.length > 1 ? '#925c87' : '#9ca98d'}
                   strokeWidth={active ? 5 : 2}
                 />
                 <GenealogyBee type={point.type} x={x} y={cy} />
@@ -132,22 +129,17 @@ export default function SharedGenealogyGraph({
                     className="music-cursor"
                   />
                 )}
-                <text
-                  x={x}
-                  y={cy + 34}
-                  textAnchor="middle"
-                  className="shared-tree-label"
-                >
+                <text x={x} y={cy + 34} textAnchor="middle" className="shared-tree-label">
                   {bee.label}
                   <tspan x={x} dy="12">
                     n = {model.counts[point.generation]}
                   </tspan>
                 </text>
               </g>
-            )
+            );
           })}
         </svg>
       </div>
     </section>
-  )
+  );
 }
